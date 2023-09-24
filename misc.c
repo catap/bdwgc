@@ -192,6 +192,7 @@ GC_oom_func GC_oom_fn = GC_default_oom_fn;
 #elif !defined(HAVE_NO_FORK)
   GC_API void GC_CALL GC_atfork_prepare(void)
   {
+    GC_log_printf("[%d] generic GC_atfork_prepare\n", getpid());
 #   ifdef THREADS
       ABORT("fork() handling unsupported");
 #   endif
@@ -199,11 +200,13 @@ GC_oom_func GC_oom_fn = GC_default_oom_fn;
 
   GC_API void GC_CALL GC_atfork_parent(void)
   {
+    GC_log_printf("[%d] generic GC_atfork_parent\n", getpid());
     /* empty */
   }
 
   GC_API void GC_CALL GC_atfork_child(void)
   {
+    GC_log_printf("[%d] generic GC_atfork_child\n", getpid());
     /* empty */
   }
 #endif /* !CAN_HANDLE_FORK && !HAVE_NO_FORK */
