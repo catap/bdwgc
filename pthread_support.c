@@ -1190,7 +1190,7 @@ static void fork_prepare_proc(void)
 #         endif
         }
 #     endif
-      GC_acquire_dirty_lock();
+      STOP_WORLD();
 }
 
 /* Called in parent after a fork() (even if the latter failed). */
@@ -1199,7 +1199,6 @@ static void fork_prepare_proc(void)
 #endif
 static void fork_parent_proc(void)
 {
-    GC_release_dirty_lock();
 #   if defined(PARALLEL_MARK)
       if (GC_parallel) {
 #       if defined(THREAD_SANITIZER) && defined(GC_ASSERTIONS) \
@@ -1212,6 +1211,7 @@ static void fork_parent_proc(void)
       }
 #   endif
     RESTORE_CANCEL(fork_cancel_state);
+    START_WORLD();
     UNLOCK();
 }
 
@@ -1221,7 +1221,6 @@ static void fork_parent_proc(void)
 #endif
 static void fork_child_proc(void)
 {
-    GC_release_dirty_lock();
 #   ifdef PARALLEL_MARK
       if (GC_parallel) {
 #       if defined(THREAD_SANITIZER) && defined(GC_ASSERTIONS) \
@@ -1245,6 +1244,7 @@ static void fork_child_proc(void)
       GC_dirty_update_child();
 #   endif
     RESTORE_CANCEL(fork_cancel_state);
+    START_WORLD();
     UNLOCK();
     /* Even though after a fork the child only inherits the single      */
     /* thread that called the fork(), if another thread in the parent   */

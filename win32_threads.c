@@ -1206,6 +1206,7 @@ GC_API void * GC_CALL GC_get_my_stackbottom(struct GC_stack_base *sb)
         if (GC_parallel)
           GC_acquire_mark_lock();
 #     endif
+      STOP_WORLD();
     }
 
     static void fork_parent_proc(void)
@@ -1214,6 +1215,7 @@ GC_API void * GC_CALL GC_get_my_stackbottom(struct GC_stack_base *sb)
         if (GC_parallel)
           GC_release_mark_lock();
 #     endif
+      START_WORLD();
       UNLOCK();
     }
 
@@ -1229,6 +1231,7 @@ GC_API void * GC_CALL GC_get_my_stackbottom(struct GC_stack_base *sb)
         }
 #     endif
       GC_remove_all_threads_but_me();
+      START_WORLD();
       UNLOCK();
     }
 
