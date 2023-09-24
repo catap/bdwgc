@@ -816,6 +816,9 @@ STATIC void GC_remove_all_threads_but_me(void)
     pthread_t self = pthread_self();
     int hv;
 
+    GC_log_printf("[%d] GC_remove_all_threads_but_me is called\n",
+                  getpid());
+
     for (hv = 0; hv < THREAD_TABLE_SZ; ++hv) {
       GC_thread p, next;
       GC_thread me = NULL;
@@ -826,6 +829,8 @@ STATIC void GC_remove_all_threads_but_me(void)
             && me == NULL) { /* ignore dead threads with the same id */
           me = p;
           p -> next = 0;
+          GC_log_printf("[%d] GC_remove_all_threads_but_me found me at %d\n",
+                        getpid(), hv);
 #         ifdef GC_DARWIN_THREADS
             /* Update thread Id after fork (it is OK to call    */
             /* GC_destroy_thread_local and GC_free_inner        */
