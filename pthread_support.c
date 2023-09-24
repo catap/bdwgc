@@ -46,6 +46,7 @@
 #   include <fcntl.h>
 # endif
 # include <signal.h>
+# include <stdio.h>
 
 # include "gc_inline.h"
 
@@ -1344,14 +1345,14 @@ GC_INNER void GC_thr_init(void)
   GC_thr_initialized = TRUE;
 
   GC_ASSERT((word)&GC_threads % sizeof(word) == 0);
-  GC_log_printf("[%d] GC_thr_init %s\n", getpid());
+  fprintf(stderr, "[%d] GC_thr_init %s\n", getpid());
 # ifdef CAN_HANDLE_FORK
     /* Prepare for forks if requested.  */
-    GC_log_printf("[%d] GC_thr_init / GC_handle_fork: %d %s\n", getpid(), GC_handle_fork);
+    fprintf(stderr, "[%d] GC_thr_init / GC_handle_fork: %d %s\n", getpid(), GC_handle_fork);
     if (GC_handle_fork) {
 #     ifdef CAN_CALL_ATFORK
         int rc = pthread_atfork(fork_prepare_proc, fork_parent_proc, fork_child_proc);
-        GC_log_printf("[%d] GC_thr_init / pthread_atfork: %s %s\n", getpid(), strerror(rc));
+        fprintf(stderr, "[%d] GC_thr_init / pthread_atfork: %s %s\n", getpid(), strerror(rc));
         if (rc == 0) {
           /* Handlers successfully registered.  */
           GC_handle_fork = 1;
