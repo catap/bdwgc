@@ -215,6 +215,7 @@ GC_oom_func GC_oom_fn = GC_default_oom_fn;
 /* if called before GC_INIT.                                            */
 GC_API void GC_CALL GC_set_handle_fork(int value GC_ATTR_UNUSED)
 {
+    GC_log_printf("[%d] GC_set_handle_fork(%d)\n", getpid(), value);
 # ifdef CAN_HANDLE_FORK
     if (!GC_is_initialized)
       GC_handle_fork = value >= -1 ? value : 1;
