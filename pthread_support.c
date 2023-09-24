@@ -1221,11 +1221,6 @@ static void fork_parent_proc(void)
 #endif
 static void fork_child_proc(void)
 {
-    /* Clean up the thread table, so that just our thread is left.      */
-    /* We should do it as early as possible, before releast any lock.   */
-    /* Otherwise it may lead to `thread_suspend failed` on Darwin       */
-    /* Due to missmatch value which is returned by `mach_thread_self()` */
-    GC_remove_all_threads_but_me();
     GC_release_dirty_lock();
 #   ifdef PARALLEL_MARK
       if (GC_parallel) {
@@ -1244,6 +1239,8 @@ static void fork_child_proc(void)
         available_markers_m1 = 0;
 #     endif
 #   endif
+    /* Clean up the thread table, so that just our thread is left.      */
+    GC_remove_all_threads_but_me();
 #   ifndef GC_DISABLE_INCREMENTAL
       GC_dirty_update_child();
 #   endif
