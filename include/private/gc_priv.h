@@ -2292,14 +2292,14 @@ GC_INNER GC_bool GC_block_empty(hdr * hhdr);
                                 /* Block completely unmarked?   */
 GC_INNER int GC_CALLBACK GC_never_stop_func(void);
                                 /* Always returns 0 (FALSE).            */
-GC_INNER GC_bool GC_try_to_collect_inner(GC_stop_func f);
+GC_INNER GC_bool GC_try_to_collect_inner(const char* tag, GC_stop_func f);
 
                                 /* Collect; caller must have acquired   */
                                 /* lock.  Collection is aborted if f    */
                                 /* returns TRUE.  Returns TRUE if it    */
                                 /* completes successfully.              */
-#define GC_gcollect_inner() \
-                (void)GC_try_to_collect_inner(GC_never_stop_func)
+#define GC_gcollect_inner(tag) \
+                (void)GC_try_to_collect_inner(tag, GC_never_stop_func)
 
 #ifdef THREADS
   GC_EXTERN GC_bool GC_in_thread_creation;

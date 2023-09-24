@@ -498,7 +498,7 @@ STATIC void GC_maybe_gc(void)
 
         if (!GC_incremental) {
             /* TODO: If possible, GC_default_stop_func should be used here */
-            GC_try_to_collect_inner(GC_never_stop_func);
+            GC_try_to_collect_inner("GC_maybe_gc", GC_never_stop_func);
             n_partial_gcs = 0;
             return;
         } else {
@@ -567,8 +567,10 @@ GC_API GC_on_collection_event_proc GC_CALL GC_get_on_collection_event(void)
 /* Stop the world garbage collection.  If stop_func is not      */
 /* GC_never_stop_func then abort if stop_func returns TRUE.     */
 /* Return TRUE if we successfully completed the collection.     */
-GC_INNER GC_bool GC_try_to_collect_inner(GC_stop_func stop_func)
+GC_INNER GC_bool GC_try_to_collect_inner(const char* tag, GC_stop_func stop_func)
 {
+    GC_log_printf("[%d] GC_try_to_collect_inner because of %s\n",
+                  getpid(), tag);
 #   ifndef NO_CLOCK
       CLOCK_TYPE start_time = CLOCK_TYPE_INITIALIZER;
       GC_bool start_time_valid;
@@ -1306,7 +1308,7 @@ STATIC GC_bool GC_try_to_collect_general(GC_stop_func stop_func,
     ENTER_GC();
     /* Minimize junk left in my registers */
       GC_noop6(0,0,0,0,0,0);
-    result = GC_try_to_collect_inner(stop_func != 0 ? stop_func :
+    result = GC_try_to_collect_inner("GC_try_to_collect_general", stop_func != 0 ? stop_func :
                                      GC_default_stop_func);
     EXIT_GC();
     IF_USE_MUNMAP(GC_unmap_threshold = old_unmap_threshold); /* restore */
@@ -1692,7 +1694,7 @@ GC_INNER GC_bool GC_collect_or_expand(word needed_blocks,
       /* Try to do a full collection using 'default' stop_func (unless  */
       /* nothing has been allocated since the latest collection or heap */
       /* expansion is disabled).                                        */
-      gc_not_stopped = GC_try_to_collect_inner(
+      gc_not_stopped = GC_try_to_collect_inner("GC_collect_or_expand",
                         GC_bytes_allocd > 0 && (!GC_dont_expand || !retry) ?
                         GC_default_stop_func : GC_never_stop_func);
       if (gc_not_stopped == TRUE || !retry) {
@@ -1734,11 +1736,11 @@ GC_INNER GC_bool GC_collect_or_expand(word needed_blocks,
             || !GC_expand_hp_inner(needed_blocks))) {
       if (gc_not_stopped == FALSE) {
         /* Don't increment GC_fail_count here (and no warning).     */
-        GC_gcollect_inner();
+        GC_gcollect_inner("GC_collect_or_expand / gc_not_stopped");
         GC_ASSERT(GC_bytes_allocd == 0);
       } else if (GC_fail_count++ < GC_max_retries) {
         WARN("Out of Memory!  Trying to continue...\n", 0);
-        GC_gcollect_inner();
+        GC_gcollect_inner("GC_collect_or_expand / OOM");
       } else {
 #       if !defined(AMIGA) || !defined(GC_AMIGA_FASTALLOC)
 #         ifdef USE_MUNMAP

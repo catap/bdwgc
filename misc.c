@@ -1362,7 +1362,7 @@ GC_API void GC_CALL GC_init(void)
     COND_DUMP;
     /* Get black list set up and/or incremental GC started */
     if (!GC_dont_precollect || GC_incremental) {
-        GC_gcollect_inner();
+        GC_gcollect_inner("GC_init");
     }
 #   if defined(GC_ASSERTIONS) && defined(GC_ALWAYS_MULTITHREADED)
         UNLOCK();
@@ -1436,7 +1436,7 @@ GC_API void GC_CALL GC_enable_incremental(void)
           DISABLE_CANCEL(cancel_state);
           if (GC_bytes_allocd > 0) {
             /* There may be unmarked reachable objects. */
-            GC_gcollect_inner();
+            GC_gcollect_inner("GC_enable_incremental");
           }
             /* else we're OK in assuming everything's   */
             /* clean since nothing can point to an      */
