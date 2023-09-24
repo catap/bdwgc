@@ -481,7 +481,7 @@ GC_INLINE void GC_notify_full_gc(void)
 
 STATIC GC_bool GC_is_full_gc = FALSE;
 
-STATIC GC_bool GC_stopped_mark(GC_stop_func stop_func);
+STATIC GC_bool GC_stopped_mark(const char* tag, GC_stop_func stop_func);
 STATIC void GC_finish_collection(void);
 
 /*
@@ -528,7 +528,7 @@ STATIC void GC_maybe_gc(void)
 #       endif
         /* TODO: If possible, GC_default_stop_func should be    */
         /* used instead of GC_never_stop_func here.             */
-        if (GC_stopped_mark(GC_time_limit == GC_TIME_UNLIMITED?
+        if (GC_stopped_mark("GC_maybe_gc", GC_time_limit == GC_TIME_UNLIMITED?
                             GC_never_stop_func : GC_timeout_stop_func)) {
 #           ifdef SAVE_CALL_CHAIN
                 GC_save_callers(GC_last_stack);
@@ -625,7 +625,7 @@ GC_INNER GC_bool GC_try_to_collect_inner(GC_stop_func stop_func)
         GC_save_callers(GC_last_stack);
 #   endif
     GC_is_full_gc = TRUE;
-    if (!GC_stopped_mark(stop_func)) {
+    if (!GC_stopped_mark("GC_try_to_collect_inner", stop_func)) {
       if (!GC_incremental) {
         /* We're partially done and have no way to complete or use      */
         /* current work.  Reestablish invariants as cheaply as          */
@@ -737,7 +737,7 @@ GC_INNER void GC_collect_a_little_inner(int n)
         if (i < max_deficit && !GC_dont_gc) {
             /* Need to finish a collection.     */
 #           ifdef SAVE_CALL_CHAIN
-                GC_save_callers(GC_last_stack);
+                GC_save_callers("GC_collect_a_little_inner / GC_last_stack", GC_last_stack);
 #           endif
 #           ifdef PARALLEL_MARK
                 if (GC_parallel)
@@ -748,7 +748,7 @@ GC_INNER void GC_collect_a_little_inner(int n)
 #               ifndef NO_CLOCK
                     GET_TIME(GC_start_time);
 #               endif
-                if (GC_stopped_mark(GC_timeout_stop_func)) {
+                if (GC_stopped_mark("GC_collect_a_little_inner / GC_timeout_stop_func", GC_timeout_stop_func)) {
                     GC_finish_collection();
                 } else {
                     GC_n_attempts++;
@@ -756,7 +756,7 @@ GC_INNER void GC_collect_a_little_inner(int n)
             } else {
                 /* TODO: If possible, GC_default_stop_func should be    */
                 /* used here.                                           */
-                (void)GC_stopped_mark(GC_never_stop_func);
+                (void)GC_stopped_mark("GC_collect_a_little_inner / GC_never_stop_func", GC_never_stop_func);
                 GC_finish_collection();
             }
         }
@@ -818,12 +818,14 @@ GC_API int GC_CALL GC_collect_a_little(void)
  * If stop_func() ever returns TRUE, we may fail and return FALSE.
  * Increment GC_gc_no if we succeed.
  */
-STATIC GC_bool GC_stopped_mark(GC_stop_func stop_func)
+STATIC GC_bool GC_stopped_mark(const char* tag, GC_stop_func stop_func)
 {
     int i;
 #   ifndef NO_CLOCK
       CLOCK_TYPE start_time = CLOCK_TYPE_INITIALIZER;
 #   endif
+
+    GC_log_printf("[%d] GC_stopped_mark because of %s\n", getpid(), tag);
 
     GC_ASSERT(I_HOLD_LOCK());
 #   if !defined(REDIRECT_MALLOC) && defined(USE_WINALLOC)
