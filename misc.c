@@ -2689,7 +2689,7 @@ GC_API void GC_CALL GC_abort_on_oom(void)
 #   ifdef THREAD_LOCAL_ALLOC
       GC_ASSERT(!GC_world_stopped);
 #   endif
-    STOP_WORLD();
+    STOP_WORLD("GC_stop_world_external");
 #   ifdef THREAD_LOCAL_ALLOC
       GC_world_stopped = TRUE;
 #   endif

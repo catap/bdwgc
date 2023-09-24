@@ -1190,7 +1190,7 @@ static void fork_prepare_proc(void)
 #         endif
         }
 #     endif
-      STOP_WORLD();
+      STOP_WORLD("fork_prepare_proc");
 }
 
 /* Called in parent after a fork() (even if the latter failed). */

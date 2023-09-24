@@ -845,7 +845,7 @@ STATIC GC_bool GC_stopped_mark(GC_stop_func stop_func)
       if (GC_on_collection_event)
         GC_on_collection_event(GC_EVENT_PRE_STOP_WORLD);
 #   endif
-    STOP_WORLD();
+    STOP_WORLD("GC_stopped_mark");
 #   ifdef THREADS
       if (GC_on_collection_event)
         GC_on_collection_event(GC_EVENT_POST_STOP_WORLD);

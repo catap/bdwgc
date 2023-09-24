@@ -550,15 +550,15 @@ STATIC GC_bool GC_suspend_thread_list(thread_act_array_t act_list, int count,
 #endif /* !GC_NO_THREADS_DISCOVERY */
 
 /* Caller holds allocation lock.        */
-GC_INNER void GC_stop_world(void)
+GC_INNER void GC_stop_world(const char* tag)
 {
   task_t my_task = current_task();
   mach_port_t my_thread = mach_thread_self();
   kern_return_t kern_result;
 
 # ifdef DEBUG_THREADS
-    GC_log_printf("[%d] Stopping the world from thread %p\n",
-                  getpid(), (void *)(word)my_thread);
+    GC_log_printf("[%d] Stopping the world from thread %p because of %s\n",
+                  getpid(), (void *)(word)my_thread, tag);
 # endif
 # ifdef PARALLEL_MARK
     if (GC_parallel) {

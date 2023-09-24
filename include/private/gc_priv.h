@@ -626,9 +626,9 @@ EXTERN_C_BEGIN
 # else
 #   if defined(NN_PLATFORM_CTR) || defined(NINTENDO_SWITCH) \
        || defined(GC_WIN32_THREADS) || defined(GC_PTHREADS)
-      GC_INNER void GC_stop_world(void);
+      GC_INNER void GC_stop_world(const char* tag);
       GC_INNER void GC_start_world(void);
-#     define STOP_WORLD() GC_stop_world()
+#     define STOP_WORLD(tag) GC_stop_world(tag)
 #     define START_WORLD() GC_start_world()
 #   else
         /* Just do a sanity check: we are not inside GC_do_blocking().  */

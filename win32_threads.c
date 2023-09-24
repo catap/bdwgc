@@ -1206,7 +1206,7 @@ GC_API void * GC_CALL GC_get_my_stackbottom(struct GC_stack_base *sb)
         if (GC_parallel)
           GC_acquire_mark_lock();
 #     endif
-      STOP_WORLD();
+      STOP_WORLD("fork_prepare_proc");
     }
 
     static void fork_parent_proc(void)
