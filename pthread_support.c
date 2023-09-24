@@ -1276,6 +1276,7 @@ static void fork_child_proc(void)
   /* Routines for fork handling by client (no-op if pthread_atfork works). */
   GC_API void GC_CALL GC_atfork_prepare(void)
   {
+    GC_log_printf("[%d] GC_atfork_prepare entered\n", getpid());
     if (!EXPECT(GC_is_initialized, TRUE)) GC_init();
 #   if defined(GC_DARWIN_THREADS) && defined(MPROTECT_VDB)
       if (GC_auto_incremental) {
@@ -1285,18 +1286,23 @@ static void fork_child_proc(void)
 #   endif
     if (GC_handle_fork <= 0)
       fork_prepare_proc();
+    GC_log_printf("[%d] GC_atfork_prepare exit\n", getpid());
   }
 
   GC_API void GC_CALL GC_atfork_parent(void)
   {
+    GC_log_printf("[%d] GC_atfork_parent entered\n", getpid());
     if (GC_handle_fork <= 0)
       fork_parent_proc();
+    GC_log_printf("[%d] GC_atfork_parent exit\n", getpid());
   }
 
   GC_API void GC_CALL GC_atfork_child(void)
   {
+    GC_log_printf("[%d] GC_atfork_child entered\n", getpid());
     if (GC_handle_fork <= 0)
       fork_child_proc();
+    GC_log_printf("[%d] GC_atfork_child exit\n", getpid());
   }
 #endif /* CAN_HANDLE_FORK */
 
