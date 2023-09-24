@@ -830,6 +830,10 @@ STATIC void GC_remove_all_threads_but_me(void)
             /* Update thread Id after fork (it is OK to call    */
             /* GC_destroy_thread_local and GC_free_inner        */
             /* before update).                                  */
+#           ifdef DEBUG_THREADS
+              GC_log_printf("[%d] update thread id: %p -> %p\n",
+                            getpid(), (void *)(word)me->stop_info.mach_thread, mach_thread_self());
+#           endif
             me -> stop_info.mach_thread = mach_thread_self();
 #         endif
 #         ifdef USE_TKILL_ON_ANDROID
@@ -1217,6 +1221,11 @@ static void fork_parent_proc(void)
 #endif
 static void fork_child_proc(void)
 {
+    /* Clean up the thread table, so that just our thread is left.      */
+    /* We should do it as early as possible, before releast any lock.   */
+    /* Otherwise it may lead to `thread_suspend failed` on Darwin       */
+    /* Due to missmatch value which is returned by `mach_thread_self()` */
+    GC_remove_all_threads_but_me();
     GC_release_dirty_lock();
 #   ifdef PARALLEL_MARK
       if (GC_parallel) {
@@ -1235,8 +1244,6 @@ static void fork_child_proc(void)
         available_markers_m1 = 0;
 #     endif
 #   endif
-    /* Clean up the thread table, so that just our thread is left.      */
-    GC_remove_all_threads_but_me();
 #   ifndef GC_DISABLE_INCREMENTAL
       GC_dirty_update_child();
 #   endif

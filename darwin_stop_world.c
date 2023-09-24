@@ -557,8 +557,8 @@ GC_INNER void GC_stop_world(void)
   kern_return_t kern_result;
 
 # ifdef DEBUG_THREADS
-    GC_log_printf("Stopping the world from thread %p\n",
-                  (void *)(word)my_thread);
+    GC_log_printf("[%d] Stopping the world from thread %p\n",
+                  getpid(), (void *)(word)my_thread);
 # endif
 # ifdef PARALLEL_MARK
     if (GC_parallel) {
@@ -635,6 +635,10 @@ GC_INNER void GC_stop_world(void)
             kern_result = thread_suspend(p->stop_info.mach_thread);
           } while (kern_result == KERN_ABORTED);
           GC_release_dirty_lock();
+# ifdef DEBUG_THREADS
+          GC_log_printf("[%d] thread_suspend(%p) returns %s\n",
+                        getpid(), (void *)(word)p->stop_info.mach_thread, mach_error_string(kern_result));
+# endif
           if (kern_result != KERN_SUCCESS)
             ABORT("thread_suspend failed");
           if (GC_on_thread_event)
