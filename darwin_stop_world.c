@@ -440,6 +440,8 @@ GC_INNER void GC_push_all_stacks(void)
 
     GC_INNER void GC_darwin_register_mach_handler_thread(mach_port_t thread)
     {
+      GC_log_printf("[%d] GC_darwin_register_mach_handler_thread: %p\n",
+                    getpid(), (void *)(word)thread);
       GC_mach_handler_thread = thread;
       GC_use_mach_handler_thread = TRUE;
     }

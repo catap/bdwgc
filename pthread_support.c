@@ -387,6 +387,8 @@ STATIC void * GC_mark_thread(void * id)
 # endif
 # if defined(GC_DARWIN_THREADS) && !defined(GC_NO_THREADS_DISCOVERY)
     marker_mach_threads[(word)id] = mach_thread_self();
+    GC_log_printf("[%d] GC_mark_thread(%d): %p\n",
+                  getpid(), (word)id, (void *)(word)(marker_mach_threads[(word)id]));
 # endif
 
   /* Inform GC_start_mark_threads about completion of marker data init. */
@@ -1382,6 +1384,8 @@ GC_INNER void GC_thr_init(void)
       ABORT("Failed to allocate memory for the initial thread");
 #   ifdef GC_DARWIN_THREADS
       t -> stop_info.mach_thread = mach_thread_self();
+      GC_log_printf("[%d] GC_thr_init: %p\n",
+                    getpid(), (void *)(word)(t -> stop_info.mach_thread));
 #   else
       t -> stop_info.stack_ptr = GC_approx_sp();
 #   endif
@@ -2062,6 +2066,8 @@ STATIC GC_thread GC_register_my_thread_inner(const struct GC_stack_base *sb,
       ABORT("Failed to allocate memory for thread registering");
 #   ifdef GC_DARWIN_THREADS
       me -> stop_info.mach_thread = mach_thread_self();
+      GC_log_printf("[%d] GC_register_my_thread_inner: %p\n",
+                    getpid(), (void *)(word)(me -> stop_info.mach_thread));
 #   endif
     GC_record_stack_base(me, sb);
 #   ifdef GC_EXPLICIT_SIGNALS_UNBLOCK
@@ -2122,6 +2128,8 @@ GC_API int GC_CALL GC_register_my_thread(const struct GC_stack_base *sb)
           /* Reinitialize mach_thread to avoid thread_suspend fail      */
           /* with MACH_SEND_INVALID_DEST error.                         */
           me -> stop_info.mach_thread = mach_thread_self();
+          GC_log_printf("[%d] GC_register_my_thread: %p\n",
+                        getpid(), (void *)(word)(me -> stop_info.mach_thread));
 #       endif
         GC_record_stack_base(me, sb);
         me -> flags &= ~FINISHED; /* but not DETACHED */
